@@ -7,6 +7,7 @@ namespace Dream.Models.SOE_Basic
         static void Main(string[] args)
         {
             RunSimulation(args, false); // Mark saveScenario here!!
+            // Line of code
         }   
     
         static void RunSimulation(string[] args, bool saveScenario=false)
