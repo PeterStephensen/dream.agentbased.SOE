@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="run.cmd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dream.AgentClass\Dream.AgentClass.csproj" />
+    <ProjectReference Include="..\Dream.IO\Dream.IO.csproj" />
+  </ItemGroup>
+
+</Project>

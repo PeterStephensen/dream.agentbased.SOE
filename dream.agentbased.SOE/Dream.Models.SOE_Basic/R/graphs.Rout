@@ -1,0 +1,99 @@
+
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Tidligere gemt arbejdsrum gendannet]
+
+> rm(list=ls())
+> #install.packages("forecast")
+> library(dplyr)
+
+Vedhæfter pakke: 'dplyr'
+
+De følgende objekter er maskerede fra 'package:stats':
+
+    filter, lag
+
+De følgende objekter er maskerede fra 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(forecast)
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+> 
+> if(Sys.info()['nodename'] == "C1709161")    # PSP's machine
++ {
++   o_dir = "C:/test/Dream.AgentBased.MacroModel"  
++ }
+> if(Sys.info()['nodename'] == "VDI00316")    # Fjernskrivebord
++ {
++   o_dir = "C:/Users/B007566/Documents/Output"  
++ }
+> if(Sys.info()['nodename'] == "VDI00382")    # Fjernskrivebord
++ {
++   o_dir = "C:/Users/B007566/Documents/Output"  
++ }
+> if(Sys.info()['nodename'] == "C2210098")     # Peters nye maskine
++ {
++   o_dir = "C:/Users/B007566/Documents/Output"  
++ }
+> 
+> if(F)
++ {
++   dd10 = read.delim(paste0(o_dir,"/output.txt"))
++   mean(dd10$DiscountedProfits)
++   
++   plot(dd10$DiscountedProfits)
++   abline(h=0)
++   abline(h=mean(dd10$DiscountedProfits), lty=2)
++   
++   dd2 = read.delim(paste0(o_dir,"/output_2.txt"))
++   hist(dd2$n_firms, breaks = 70, xlim=c(0,400))
++   hist(dd10$n_firms, breaks = 70, xlim=c(0,400))
++   
++   hist(dd2$Wage/dd2$Price, breaks = 50, xlim=c(0,0.2), ylim=c(0,85))
++   hist(dd10$Wage/dd10$Price, breaks = 30, xlim=c(0,0.2), ylim=c(0,85))
++   
++ }
+> 
+> hpfilter      = function(x, mu = 100) {
++   y = x
++   n <- length(y)          # number of observations
++   I <- diag(n)            # creates an identity matrix
++   D <- diff(I,lag=1,d=2)  # second order differences
++   d <- solve(I + mu * crossprod(D) , y) # solves focs
++   d
++ }
+> 
+> d = read.delim(paste0(o_dir,"/data_year.txt"))
+> d_house = read.delim(paste0(o_dir,"/data_households.txt"))
+> d_prod = read.delim(paste0(o_dir,"/data_firms.txt"))
+> 
+> 
+> y0 = 2014
+> burnIn = 2035
+> 
+> alpha = 0.5
+> fi = 2
+> k = 2.5
+> 
+> g = (1 + 0.02)^(1/12) - 1
+> 
+> l_bar = k * (fi/(1-alpha))^(1/alpha) /(k - (1/(1-alpha)))
+> 
+> pdf(paste0(o_dir,"/graph1.pdf"))
