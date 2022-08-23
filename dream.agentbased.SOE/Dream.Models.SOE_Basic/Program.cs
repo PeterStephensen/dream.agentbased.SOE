@@ -55,16 +55,12 @@ namespace Dream.Models.SOE_Basic
             settings.FirmPriceMarkupSensitivity = sens;
             settings.FirmPriceMarkdown = 1 * mark;             //Stable prices  
             settings.FirmPriceMarkdownSensitivity = sens;  //Stable prices 
-            //settings.FirmPriceMarkdown = 0.5 * mark;             //Stable prices  
-            //settings.FirmPriceMarkdownSensitivity = 0.5 * sens;  //Stable prices 
 
             // In zone
             settings.FirmPriceMarkupInZone = 1 * mark;
             settings.FirmPriceMarkupSensitivityInZone = sens;
             settings.FirmPriceMarkdownInZone = 1 * mark;                //Stable prices  
             settings.FirmPriceMarkdownSensitivityInZone = sens;    //Stable prices 
-            //settings.FirmPriceMarkdownInZone = 0.25 * mark;                //Stable prices  
-            //settings.FirmPriceMarkdownSensitivityInZone = 0.25 * sens;    //Stable prices 
 
             settings.FirmProbabilityRecalculatePrice = 0.5;
             settings.FirmProbabilityRecalculatePriceInZone = 0.5; // 0.2
@@ -151,7 +147,7 @@ namespace Dream.Models.SOE_Basic
             settings.StatisticsOutputPeriode = (2075 - 2014) * 12;
             settings.StatisticsGraphicsPlotInterval = 12 * 1;
             
-            settings.StatisticsGraphicsStartPeriod = 12 * 2;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            settings.StatisticsGraphicsStartPeriod = 12 * 100;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if(settings.SaveScenario)
                 settings.StatisticsGraphicsStartPeriod = 12 * 500;
 

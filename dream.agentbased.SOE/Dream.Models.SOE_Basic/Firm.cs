@@ -18,6 +18,7 @@ namespace Dream.Models.SOE_Basic
         Time _time;
         Random _random;
         Statistics _statistics;
+        
         double _phi0, _phi; // Productivity
         double _l_primo;   // Primo employment
         double _l_optimal;   // Optimal employment

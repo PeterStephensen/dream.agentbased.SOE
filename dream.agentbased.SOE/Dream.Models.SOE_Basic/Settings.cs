@@ -10,7 +10,9 @@ namespace Dream.Models.SOE_Basic
     public class Settings
     {
         public int NumberOfHouseholdsPerFirm { get; set; } = 0;
-        public bool FirmStartNewFirms { get; set; } = false; 
+        public bool FirmStartNewFirms { get; set; } = false;
+
+        public int NumberOfSectors { get; set; } = 1;
 
         public int NumberOfFirms { get; set; } = 0;
         /// <summary>
