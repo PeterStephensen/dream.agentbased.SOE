@@ -16,10 +16,11 @@ namespace Dream.Models.SOE_Basic
             Settings settings = new();
             settings.SaveScenario = saveScenario;
 
-            double scale = 1 * 1.0; //8
+            double scale = 2 * 1.0; 
 
             //Firms
-            settings.NumberOfFirms = (int)(300 * scale);
+            settings.NumberOfSectors = 8;
+            settings.NumberOfFirms = (int)(75 * scale) * settings.NumberOfSectors;
 
             settings.FirmParetoMinPhi = 0.5;
             settings.FirmPareto_k = 2.5;  // k * (1 - alpha) > 1     
@@ -97,6 +98,7 @@ namespace Dream.Models.SOE_Basic
             settings.HouseholdProductivityLogMeanInitial = -0.5 * Math.Pow(settings.HouseholdProductivityLogSigmaInitial, 2); // Sikrer at forventet produktivitet er 1
             settings.HouseholdProductivityErrorSigma = 0.02;
             settings.HouseholdNewBorn = (int)(10 * scale);
+            settings.HouseholdCES_Elasticity = 0.7;
 
             settings.HouseholdPensionAge = 67 * 12;
             settings.HouseholdStartAge = 18 * 12;
@@ -147,7 +149,7 @@ namespace Dream.Models.SOE_Basic
             settings.StatisticsOutputPeriode = (2075 - 2014) * 12;
             settings.StatisticsGraphicsPlotInterval = 12 * 1;
             
-            settings.StatisticsGraphicsStartPeriod = 12 * 100;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            settings.StatisticsGraphicsStartPeriod = 12 * 75;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if(settings.SaveScenario)
                 settings.StatisticsGraphicsStartPeriod = 12 * 500;
 
