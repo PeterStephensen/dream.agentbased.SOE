@@ -20,31 +20,3 @@ Type 'q()' to quit R.
 > rm(list=ls())
 > #install.packages("forecast")
 > library(dplyr)
-
-Vedhæfter pakke: 'dplyr'
-
-De følgende objekter er maskerede fra 'package:stats':
-
-    filter, lag
-
-De følgende objekter er maskerede fra 'package:base':
-
-    intersect, setdiff, setequal, union
-
-> library(forecast)
-Registered S3 method overwritten by 'quantmod':
-  method            from
-  as.zoo.data.frame zoo 
-> 
-> if(Sys.info()['nodename'] == "C1709161")    # PSP's machine
-+ {
-+   o_dir = "C:/test/Dream.AgentBased.MacroModel"  
-+ }
-> if(Sys.info()['nodename'] == "VDI00316")    # Fjernskrivebord
-+ {
-+   o_dir = "C:/Users/B007566/Documents/Output"  
-+ }
-> if(Sys.info()['nodename'] == "VDI00382")    # Fjernskrivebord
-+ {
-+   o_dir = "C:/Users/B007566/Documents/Output"  
-+ 

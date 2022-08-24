@@ -214,6 +214,12 @@ namespace Dream.Models.SOE_Basic
         public double HouseholdProductivityErrorSigma { get; set; } = 0;
 
         /// <summary>
+        /// Elasticity of subsstitution in housholds utility function
+        /// </summary>
+        public double HouseholdCES_Elasticity { get; set; } = 0;
+
+
+        /// <summary>
         /// Initial size of investor firm portefolio
         /// </summary>
         public int InvestorInitialInflow { get; set; } = 0;
