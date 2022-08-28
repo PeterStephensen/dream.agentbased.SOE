@@ -130,8 +130,7 @@ namespace Dream.Models.SOE_Basic
 
                     if (_firmEmployment != null)
                         _yr_employment++;
-
-                    
+                   
                     _income = _w * _productivity + _simulation.Statistics.PublicProfitPerHousehold;
                     break;
 
@@ -367,7 +366,6 @@ namespace Dream.Models.SOE_Basic
         }
         #endregion
 
-
         #region SearchForShop()
         void SearchForShop(int sector)
         {
@@ -404,14 +402,10 @@ namespace Dream.Models.SOE_Basic
         void ReportToStatistics()
         {
             if (_report & !_settings.SaveScenario)
-            {
-                
-                _statistics.StreamWriterHouseholdReport.WriteLineTab(_year, this.ID, _productivity, _age, _consumption, _vConsumption, _income);
+            {               
+                _statistics.StreamWriterHouseholdReport.WriteLineTab(_year, this.ID, _productivity, _age/ _settings.PeriodsPerYear, _consumption, _vConsumption, _income);
                 _statistics.StreamWriterHouseholdReport.Flush();
-
             }
-
-
         }
         #endregion
 
@@ -444,7 +438,7 @@ namespace Dream.Models.SOE_Basic
             int firmShopID = _firmShop != null ? _firmShop.ID : -1;
 
             if (!_settings.SaveScenario)
-                _statistics.StreamWriterDBHouseholds.WriteLineTab(ID, _age, firmEmploymentID, firmShopID, _productivity);
+                _statistics.StreamWriterDBHouseholds.WriteLineTab(ID, _age/ _settings.PeriodsPerYear, firmEmploymentID, firmShopID, _productivity);
 
         }
         #endregion
