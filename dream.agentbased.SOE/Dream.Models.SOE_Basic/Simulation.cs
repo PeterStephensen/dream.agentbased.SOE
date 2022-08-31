@@ -28,7 +28,8 @@ namespace Dream.Models.SOE_Basic
         int _seed = 0;
         PublicSector _publicSector;
         Forecaster _forecaster;
-        double _nFirmNew = 0;
+        double _nFirmNewTotal = 0;
+        double[] _nFirmNew;
         Dictionary<int, Firm> _firmDict;
         Agents<Firm>[] _sectorList = null;
         Firm[] _randomFirmList = null;
@@ -153,7 +154,8 @@ namespace Dream.Models.SOE_Basic
                 }
             }
 
-
+            _nFirmNew = new double[_settings.NumberOfSectors];           
+            
             EventProc(Event.System.Start);
 
         }
@@ -180,7 +182,7 @@ namespace Dream.Models.SOE_Basic
                     break;
 
                 case Event.System.PeriodStart:
-                    _statistics.Communicate(EStatistics.FirmNew, _nFirmNew);
+                    _statistics.Communicate(EStatistics.FirmNew, _nFirmNewTotal);
                     int n_firms = 0;
                     foreach (Agent fs in _sectors)
                         n_firms += fs.Count;
@@ -224,24 +226,43 @@ namespace Dream.Models.SOE_Basic
                     {
 
                         if (_time.Now < _settings.BurnInPeriod2)
-                            _nFirmNew = _settings.InvestorInitialInflow;
+                            _nFirmNewTotal = _settings.InvestorInitialInflow;
                         else
                         {
-                            _nFirmNew += _settings.InvestorProfitSensitivity * _statistics.PublicExpectedSharpRatio * _nFirmNew;
-                            if (_nFirmNew<0)
-                                _nFirmNew = 0;
+                            _nFirmNewTotal += _settings.InvestorProfitSensitivity * _statistics.PublicExpectedSharpRatioTotal * _nFirmNewTotal;
+                            if (_nFirmNewTotal<0)
+                                _nFirmNewTotal = 0;
 
                         }
 
-                        if (_nFirmNew > 0)
+                        if (_nFirmNewTotal > 0)
                         {
-                            int n = _random.NextInteger(_nFirmNew);
-                            for (int i = 0; i < n; i++)
+                            if (_time.Now < _settings.BurnInPeriod2)
                             {
-                                // Random sector
-                                int sector = _random.Next(_settings.NumberOfSectors);
-                                _sectorList[sector] += new Firm(sector);
+                                int n = _random.NextInteger(_nFirmNewTotal);
+                                for (int i = 0; i < n; i++)
+                                {
+                                    // Random sector
+                                    int sector = _random.Next(_settings.NumberOfSectors);
+                                    _sectorList[sector] += new Firm(sector);
 
+                                }
+                            }
+                            else
+                            {
+                                double kappa = 0.1;
+
+                                double sum = 0;
+                                for (int i = 0; i < _settings.NumberOfSectors; i++)
+                                    sum += _nFirmNew[i] * Math.Exp(kappa * _statistics.PublicExpectedSharpRatio[i]);
+
+                                for (int i = 0  ; i < _settings.NumberOfSectors; i++)
+                                {
+                                    double d = _nFirmNewTotal * _nFirmNew[i] * Math.Exp(kappa * _statistics.PublicExpectedSharpRatio[i]) / sum;
+                                    _nFirmNew[i] = _random.NextInteger(d);
+                                    for (int j = 0; j < _nFirmNew[i]; j++)
+                                        _sectorList[i] += new Firm(i);
+                                }
                             }
                         }
                     }                   
