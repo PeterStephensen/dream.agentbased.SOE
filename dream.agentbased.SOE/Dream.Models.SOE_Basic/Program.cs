@@ -16,11 +16,16 @@ namespace Dream.Models.SOE_Basic
             Settings settings = new();
             settings.SaveScenario = saveScenario;
 
-            double scale = 1 * 1.0; //8
+            // Scale
+            double scale = 5 * 1.0; 
+
+            settings.NumberOfSectors = 10;
+            settings.NumberOfFirms = (int)(150 * scale);
+            settings.NumberOfHouseholdsPerFirm = 5;
+            settings.HouseholdNewBorn = (int)(15 * scale);
+            settings.InvestorInitialInflow = (int)(10 * scale);
 
             //Firms
-            settings.NumberOfFirms = (int)(300 * scale);
-
             settings.FirmParetoMinPhi = 0.5;
             settings.FirmPareto_k = 2.5;  // k * (1 - alpha) > 1     
 
@@ -55,16 +60,12 @@ namespace Dream.Models.SOE_Basic
             settings.FirmPriceMarkupSensitivity = sens;
             settings.FirmPriceMarkdown = 1 * mark;             //Stable prices  
             settings.FirmPriceMarkdownSensitivity = sens;  //Stable prices 
-            //settings.FirmPriceMarkdown = 0.5 * mark;             //Stable prices  
-            //settings.FirmPriceMarkdownSensitivity = 0.5 * sens;  //Stable prices 
 
             // In zone
             settings.FirmPriceMarkupInZone = 1 * mark;
             settings.FirmPriceMarkupSensitivityInZone = sens;
             settings.FirmPriceMarkdownInZone = 1 * mark;                //Stable prices  
             settings.FirmPriceMarkdownSensitivityInZone = sens;    //Stable prices 
-            //settings.FirmPriceMarkdownInZone = 0.25 * mark;                //Stable prices  
-            //settings.FirmPriceMarkdownSensitivityInZone = 0.25 * sens;    //Stable prices 
 
             settings.FirmProbabilityRecalculatePrice = 0.5;
             settings.FirmProbabilityRecalculatePriceInZone = 0.5; // 0.2
@@ -91,7 +92,6 @@ namespace Dream.Models.SOE_Basic
             settings.FirmProductivityGrowth = 0.02;
 
             // Households
-            settings.NumberOfHouseholdsPerFirm = 6000 / 300;
             settings.HouseholdNumberFirmsSearchJob = 4;     // Try 20!
             settings.HouseholdNumberFirmsSearchShop = 75;    //----------------------- 
             settings.HouseholdProbabilityQuitJob = 0.01;
@@ -100,13 +100,12 @@ namespace Dream.Models.SOE_Basic
             settings.HouseholdProductivityLogSigmaInitial = 0.6;
             settings.HouseholdProductivityLogMeanInitial = -0.5 * Math.Pow(settings.HouseholdProductivityLogSigmaInitial, 2); // Sikrer at forventet produktivitet er 1
             settings.HouseholdProductivityErrorSigma = 0.02;
-            settings.HouseholdNewBorn = (int)(10 * scale);
+            settings.HouseholdCES_Elasticity = 0.7;
 
             settings.HouseholdPensionAge = 67 * 12;
             settings.HouseholdStartAge = 18 * 12;
 
             // Investor
-            settings.InvestorInitialInflow = (int)(10 * scale);
             settings.InvestorProfitSensitivity = 0.15;   // 0.05    5.0....Try 30 !!!!!!            
 
             // Statistics
@@ -145,13 +144,13 @@ namespace Dream.Models.SOE_Basic
 
             // Time and randomseed           
             settings.StartYear = 2014;
-            settings.EndYear = 2260;   //2160
+            settings.EndYear = 2215;   //2160
             settings.PeriodsPerYear = 12;
 
             settings.StatisticsOutputPeriode = (2075 - 2014) * 12;
             settings.StatisticsGraphicsPlotInterval = 12 * 1;
             
-            settings.StatisticsGraphicsStartPeriod = 12 * 2;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            settings.StatisticsGraphicsStartPeriod = 12 * 75;   // SE HER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if(settings.SaveScenario)
                 settings.StatisticsGraphicsStartPeriod = 12 * 500;
 
@@ -160,7 +159,7 @@ namespace Dream.Models.SOE_Basic
                 //settings.Shock = EShock.Tsunami;
                 //settings.IDScenario = Int32.Parse(args[0]);
                 settings.Shock = (EShock)Int32.Parse(args[0]);
-                settings.ShockPeriod = (2150 - 2014) * 12;
+                settings.ShockPeriod = (2105 - 2014) * 12;
             }
 
             //settings.RandomSeed = 123;  

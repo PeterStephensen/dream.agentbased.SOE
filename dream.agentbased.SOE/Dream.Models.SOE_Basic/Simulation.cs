@@ -20,16 +20,19 @@ namespace Dream.Models.SOE_Basic
         Time _time;
         Statistics _statistics;
         Agents<Household> _households;
-        Agents<Firm> _firms;
+        //Agents<Firm> _firms;
         Agents<Agent> _tools;
+        Agents<Agent> _sectors;
         Settings _settings;
         Random _random;
         int _seed = 0;
-        Firm _randomFirm;
         PublicSector _publicSector;
         Forecaster _forecaster;
-        double _nFirmNew = 0;
+        double _nFirmNewTotal = 0;
+        double[] _nFirmNew;
         Dictionary<int, Firm> _firmDict;
+        Agents<Firm>[] _sectorList = null;
+        Firm[] _randomFirmList = null;
         #endregion
 
         #region Constructors
@@ -75,19 +78,34 @@ namespace Dream.Models.SOE_Basic
             _publicSector = new PublicSector(); // Not used
             _forecaster = new Forecaster();     // Not used
             _households = new Agents<Household>();
-            _firms = new Agents<Firm>();
             _tools = new Agents<Agent>();
+
+            _sectors = new Agents<Agent>();
 
             this.AddAgent(_tools);
             this.AddAgent(_households);
-            this.AddAgent(_firms);
+            this.AddAgent(_sectors);
             this.AddAgent(_publicSector);
+
+            _sectorList = new Agents<Firm>[_settings.NumberOfSectors];
+            _randomFirmList = new Firm[_settings.NumberOfSectors];
+            for (int i = 0; i < _settings.NumberOfSectors; i++)
+            {
+                Agents<Firm> sector = new Agents<Firm>();
+                // 'sector' is placed in 2 lists: the Agent-linked-list _sectors and the C#-list _sectorList
+                _sectors += sector;         // This is for the agent tree to work
+                _sectorList[i] = sector;    // This is for looking up firms
+
+            }
 
             _tools += _statistics;
             _tools += _forecaster;
-
+            
             if(settings.LoadDatabase)
             {
+                throw new NotImplementedException();
+                
+                #region Loating database
                 Console.WriteLine("LoadDatabase..");
 
 
@@ -100,7 +118,6 @@ namespace Dream.Models.SOE_Basic
                     int id = file.GetInt32("ID");
                     Firm f = new(file);
                     _firmDict.Add(id, f);
-                    _firms += f;
 
                 }
                 file.Close();
@@ -111,27 +128,34 @@ namespace Dream.Models.SOE_Basic
                     _households += new Household(file);
 
                 file.Close();
+                #endregion
             }
             else
             {
-                for (int i = 0; i < settings.NumberOfFirms; i++)
+                int n_perSector = (int)(settings.NumberOfFirms / settings.NumberOfSectors);
+
+                for (int s = 0; s < settings.NumberOfSectors; s++)
                 {
-                    List<Household> hs = new();
-                    for (int j = 0; j < settings.NumberOfHouseholdsPerFirm; j++)
+                    for (int i = 0; i < n_perSector; i++)
                     {
-                        Household h = new();
-                        _households += h;
-                        hs.Add(h);
+                        List<Household> hs = new();
+                        for (int j = 0; j < settings.NumberOfHouseholdsPerFirm; j++)
+                        {
+                            Household h = new();
+                            _households += h;
+                            hs.Add(h);
+                        }
+
+                        Firm f = new(hs, s); //Allocate firm
+                        _sectorList[s] += f;
+                        foreach (Household h in hs)
+                            h.Communicate(ECommunicate.Initialize, f); // Tell households where they are employed
                     }
-                    Firm f = new(hs); //Allocate firm
-                                      //Firm f = new(null);
-                    _firms += f;
-                    foreach (Household h in hs)
-                        h.Communicate(ECommunicate.Initialize, f); // Tell households where they are employed
                 }
             }
 
-
+            _nFirmNew = new double[_settings.NumberOfSectors];           
+            
             EventProc(Event.System.Start);
 
         }
@@ -150,17 +174,25 @@ namespace Dream.Models.SOE_Basic
                         this.EventProc(Event.System.PeriodStart);
                         this.EventProc(Event.Economics.Update);
                         this.EventProc(Event.System.PeriodEnd);
-                        _firms.RandomizeAgents();
+                        foreach(Agent firms in _sectors)
+                           firms.RandomizeAgents();
                     } while (_time.NextPeriod());
 
                     this.EventProc(Event.System.Stop);
                     break;
 
                 case Event.System.PeriodStart:
-                    _statistics.Communicate(EStatistics.FirmNew, _nFirmNew);
-                    Console.Write("\r                                                                           ");
-                    Console.Write("\r{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, _firms.Count, _households.Count);
-                                        
+                    _statistics.Communicate(EStatistics.FirmNew, _nFirmNewTotal);
+                    int n_firms = 0;
+                    foreach (Agent fs in _sectors)
+                        n_firms += fs.Count;
+                    //Console.Write("\r                                                                           "); // Erase line
+                    //Console.Write("\r{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
+                    //Console.WriteLine("{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
+                    Console.WriteLine("{0:#.##}\t{1}\t{2}\t{3:#.######}\t{4:#.######}\t{5:#.######}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear,
+                        n_firms, _households.Count, _statistics.PublicMarketWageTotal, _statistics.PublicMarketPriceTotal, 
+                        _statistics.PublicMarketWageTotal/ _statistics.PublicMarketPriceTotal); 
+
                     base.EventProc(idEvent);
                     break;
 
@@ -194,21 +226,44 @@ namespace Dream.Models.SOE_Basic
                     {
 
                         if (_time.Now < _settings.BurnInPeriod2)
-                            _nFirmNew = _settings.InvestorInitialInflow;
+                            _nFirmNewTotal = _settings.InvestorInitialInflow;
                         else
                         {
-                            _nFirmNew += _settings.InvestorProfitSensitivity * _statistics.PublicExpectedSharpRatio * _nFirmNew;
-                            if (_nFirmNew<0)
-                                _nFirmNew = 0;
+                            _nFirmNewTotal += _settings.InvestorProfitSensitivity * _statistics.PublicExpectedSharpRatioTotal * _nFirmNewTotal;
+                            if (_nFirmNewTotal<0)
+                                _nFirmNewTotal = 0;
 
                         }
 
-                        if (_nFirmNew > 0)
+                        if (_nFirmNewTotal > 0)
                         {
-                            int n = _random.NextInteger(_nFirmNew);
-                            for (int i = 0; i < n; i++)
-                                _firms += new Firm();
+                            if (_time.Now < _settings.BurnInPeriod2)
+                            {
+                                int n = _random.NextInteger(_nFirmNewTotal);
+                                for (int i = 0; i < n; i++)
+                                {
+                                    // Random sector
+                                    int sector = _random.Next(_settings.NumberOfSectors);
+                                    _sectorList[sector] += new Firm(sector);
 
+                                }
+                            }
+                            else
+                            {
+                                double kappa = 0.1;
+
+                                double sum = 0;
+                                for (int i = 0; i < _settings.NumberOfSectors; i++)
+                                    sum += _nFirmNew[i] * Math.Exp(kappa * _statistics.PublicExpectedSharpRatio[i]);
+
+                                for (int i = 0  ; i < _settings.NumberOfSectors; i++)
+                                {
+                                    double d = _nFirmNewTotal * _nFirmNew[i] * Math.Exp(kappa * _statistics.PublicExpectedSharpRatio[i]) / sum;
+                                    _nFirmNew[i] = _random.NextInteger(d);
+                                    for (int j = 0; j < _nFirmNew[i]; j++)
+                                        _sectorList[i] += new Firm(i);
+                                }
+                            }
                         }
                     }                   
                     break;
@@ -230,38 +285,91 @@ namespace Dream.Models.SOE_Basic
         #endregion
 
         #region GetRandomFirm
-        public Firm GetRandomFirm()
+        public Firm GetRandomFirm_old()
         {
 
-            if (_randomFirm != null)
+            //if (_randomFirm != null)
+            //{
+            //    if (_firms.Count == 1)
+            //        return _randomFirm;
+            //    _randomFirm = (Firm)_randomFirm.NextAgent;
+            //}
+
+            //if (_randomFirm == null)
+            //{
+            //    _firms.RandomizeAgents();
+            //    _randomFirm = (Firm)_firms.FirstAgent;
+            //}
+            //return _randomFirm;
+            return null;
+
+        }
+        public Firm GetRandomFirm(int sector)
+        {
+
+            if (_randomFirmList[sector] != null)
             {
-                if (_firms.Count == 1)
-                    return _randomFirm;
-                _randomFirm = (Firm)_randomFirm.NextAgent;
+                if (_sectorList[sector].Count == 1)
+                    return _randomFirmList[sector];
+                _randomFirmList[sector] = (Firm)_randomFirmList[sector].NextAgent;
             }
 
-            if (_randomFirm == null)
+            if (_randomFirmList[sector] == null)
             {
-                _firms.RandomizeAgents();
-                _randomFirm = (Firm)_firms.FirstAgent;
+                _sectorList[sector].RandomizeAgents();
+                _randomFirmList[sector] = (Firm)_sectorList[sector].FirstAgent;
             }
-            return _randomFirm;
+            return _randomFirmList[sector];
 
         }
         #endregion
 
         #region GetRandomFirms
-        public List<Firm> GetRandomFirms(int n)
+        public List<Firm> GetRandomFirms_old(int n)
         {
             if (n < 1) return null;
             
             List<Firm> lst = new();
-            for (int i = 0; i < n; i++)
-                lst.Add(GetRandomFirm());
+            //for (int i = 0; i < n; i++)
+            //    lst.Add(GetRandomFirm());
 
             return lst;
         }
+        public List<Firm> GetRandomFirms(int n, int sector)
+        {
+            if (n < 1) return null;
+
+            List<Firm> lst = new();
+            for (int i = 0; i < n; i++)
+                lst.Add(GetRandomFirm(sector));
+
+            return lst;
+        }
+        public List<Firm> GetRandomFirmsAllSectors(int n)  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        {
+            if (n < 1) return null;
+
+            List<Firm> lst = new();
+            for (int i = 0; i < n; i++)
+            {
+                int sector = _random.Next(_settings.NumberOfSectors);
+                lst.Add(GetRandomFirm(sector));
+            }
+
+            return lst;
+        }
+        public List<Firm> GetRandomFirmsAllSectors_old(int n)
+        {
+            return GetRandomFirms(n,0);
+        }
         #endregion
+
+        public Agents<Firm> Sector(int sector)
+        {
+            return _sectorList[sector];
+        }
+
+
 
         #region GetFirmFromID()
         public Firm GetFirmFromID(int ID)
@@ -319,10 +427,11 @@ namespace Dream.Models.SOE_Basic
             get { return _households; }
         }
 
-        public Agents<Firm> Firms
-        {
-            get { return _firms; }
-        }
+        //public Agents<Firm> Firms
+        //{
+        //    get { return _firms; }
+        //}
+
 
         public Statistics Statistics
         {

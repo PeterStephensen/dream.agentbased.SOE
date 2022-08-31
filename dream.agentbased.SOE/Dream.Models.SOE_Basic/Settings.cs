@@ -10,7 +10,9 @@ namespace Dream.Models.SOE_Basic
     public class Settings
     {
         public int NumberOfHouseholdsPerFirm { get; set; } = 0;
-        public bool FirmStartNewFirms { get; set; } = false; 
+        public bool FirmStartNewFirms { get; set; } = false;
+
+        public int NumberOfSectors { get; set; } = 1;
 
         public int NumberOfFirms { get; set; } = 0;
         /// <summary>
@@ -210,6 +212,12 @@ namespace Dream.Models.SOE_Basic
         /// Standard deviation in error term in dynamic productivity equation
         /// </summary>
         public double HouseholdProductivityErrorSigma { get; set; } = 0;
+
+        /// <summary>
+        /// Elasticity of subsstitution in housholds utility function
+        /// </summary>
+        public double HouseholdCES_Elasticity { get; set; } = 0;
+
 
         /// <summary>
         /// Initial size of investor firm portefolio

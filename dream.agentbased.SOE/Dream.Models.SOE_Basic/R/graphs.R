@@ -105,7 +105,6 @@ cols=palette()
 n_households = last(d$n_Households)
 n_firms = n_households/l_bar
 
- 
 hist(d_prod$Productivity, breaks = 50, xlab="Firm Productivity", main=paste("Year:",yr), col=cols[3])
 
 mx = max(max(d_prod$OptimalEmployment), max(d_prod$Employment))
@@ -431,6 +430,7 @@ mn = min(min(d_prod$OptimalProduction), min(d_prod$Sales))
 plot(d_prod$OptimalProduction, d_prod$Sales, xlab="Optimal production", ylab="Sales", 
      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.7)
 abline(a=0,b=1, lty=2)
+
 
 plot(d_prod$Productivity, d_prod$Age/12, xlab="Productivity",ylab="Age (year)",
      pch=19, cex=0.2, main="Firms")

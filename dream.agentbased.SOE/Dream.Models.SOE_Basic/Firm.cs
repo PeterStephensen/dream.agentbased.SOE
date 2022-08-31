@@ -18,6 +18,7 @@ namespace Dream.Models.SOE_Basic
         Time _time;
         Random _random;
         Statistics _statistics;
+        
         double _phi0, _phi; // Productivity
         double _l_primo;   // Primo employment
         double _l_optimal;   // Optimal employment
@@ -44,11 +45,11 @@ namespace Dream.Models.SOE_Basic
         bool _report = false;
         bool _startFromDatabase = false;
         double _year = 0;
-        double _good;
+        int _sector=0;
         #endregion
 
         #region Constructors
-        public Firm(TabFileReader file) : this()
+        public Firm(TabFileReader file) : this(0)
         {
             _age = file.GetInt32("Age");
             _phi0 = file.GetDouble("phi0");
@@ -67,12 +68,12 @@ namespace Dream.Models.SOE_Basic
         }
 
 
-        public Firm(List<Household> employed) : this()
+        public Firm(List<Household> employed, int sector) : this(sector)
         {
             _employed = employed;
 
         }
-        public Firm(double good=0)
+        public Firm(int sector)
         {
             _simulation = Simulation.Instance;
             _settings = _simulation.Settings;
@@ -81,23 +82,20 @@ namespace Dream.Models.SOE_Basic
             _random = _simulation.Random;
             
             _employed = new List<Household>();
+            _sector = sector;
 
             //_phi0 = _random.NextPareto(_settings.FirmParetoMinPhi, _settings.FirmPareto_k);
             double g_m = Math.Pow(1 + _settings.FirmProductivityGrowth, 1.0 / _settings.PeriodsPerYear) - 1.0;
             _phi0 = _random.NextPareto(_settings.FirmParetoMinPhi, _settings.FirmPareto_k) * Math.Pow(1 + g_m,_time.Now); //!!!!!!!!!!!!!!!!
             _phi = _phi0;
             
-            _good = good;
-            if (_good == 0)
-                _good = _random.NextDouble();
-
             if (_random.NextEvent(_settings.StatisticsFirmReportSampleSize))
                 _report = true;
 
-            _expWage = _statistics.PublicMarketWage;
-            _expPrice = _statistics.PublicMarketPrice;
-            _w = _statistics.PublicMarketWage;
-            _p = _statistics.PublicMarketPrice;
+            _expWage = _statistics.PublicMarketWage[_sector];
+            _expPrice = _statistics.PublicMarketPrice[_sector];
+            _w = _statistics.PublicMarketWage[_sector];
+            _p = _statistics.PublicMarketPrice[_sector];
 
         }
         #endregion
@@ -119,7 +117,8 @@ namespace Dream.Models.SOE_Basic
                     _year = 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear;
                     ReportToStatistics();
 
-                    _phi = _phi0 * _statistics.PublicProductivity;
+                    _phi = _phi0 * _statistics.PublicProductivity * _statistics.PublicSectorProductivity[_sector];
+
                     _l_primo = CalcEmployment(); // Primo employment
                     _s_primo = _sales;
 
@@ -268,8 +267,8 @@ namespace Dream.Models.SOE_Basic
         #region Expectations()
         void Expectations()
         {
-            _expPrice = _settings.FirmExpectationSmooth * _expPrice + (1 - _settings.FirmExpectationSmooth) * _statistics.PublicMarketPrice;
-            _expWage = _settings.FirmExpectationSmooth * _expWage + (1 - _settings.FirmExpectationSmooth) * _statistics.PublicMarketWage;
+            _expPrice = _settings.FirmExpectationSmooth * _expPrice + (1 - _settings.FirmExpectationSmooth) * _statistics.PublicMarketPrice[_sector];
+            _expWage = _settings.FirmExpectationSmooth * _expWage + (1 - _settings.FirmExpectationSmooth) * _statistics.PublicMarketWageTotal;
             _expQuitters = _settings.FirmExpectationSmooth * _expQuitters + (1 - _settings.FirmExpectationSmooth) * _jobQuitters;
             _expApplications = _settings.FirmExpectationSmooth * _expApplications + (1 - _settings.FirmExpectationSmooth) * _jobApplications;
             //_expProfit = _settings.FirmExpectationSmooth * _expProfit + (1 - _settings.FirmExpectationSmooth) * _profit;
@@ -517,10 +516,6 @@ namespace Dream.Models.SOE_Basic
         {
             get { return _phi; }
         }
-        public double Good
-        {
-            get { return _good; }
-        }
         public double OptimalEmployment
         {
             get { return _l_optimal; }
@@ -540,6 +535,10 @@ namespace Dream.Models.SOE_Basic
         public double Wage
         {
             get { return _w; }
+        }
+        public int Sector
+        {
+            get { return _sector; }
         }
         public double Price
         {

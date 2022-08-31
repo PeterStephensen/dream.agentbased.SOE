@@ -1,6 +1,7 @@
 rm(list=ls())
 library(dplyr)
 library(forecast)
+library(data.table)
 
 if(Sys.info()['nodename'] == "C1709161")    # PSP's machine
 {
@@ -16,22 +17,24 @@ if(Sys.info()['nodename'] == "VDI00382")    # Fjernskrivebord for agentbased pro
   o_dir_svg = "H:/AgentBased/SOE/Graphics"
 }
 
-d_prod = read.delim(paste0(o_dir,"/data_firms.txt"))
+#d_prod = read.delim(paste0(o_dir,"/data_firms.txt"))
 
 
-
-files = list.files(paste0(o_dir, "\\Scenarios"), full.names = T)
-
-d0 = read.delim(files[1])
-for(i in 2:length(files))
-{
-  #i=2
-  cat(paste(files[i],":\t",i, "out of", length(files), "\n"))
-  d0 = rbind(d0, read.delim(files[i]))
-}
+files = list.files(paste0(o_dir, "\\Scenarios\\Macro"), full.names = T)
+z = lapply(files, fread)
+d0 = rbindlist(z)
 
 
-yr0 = 12*(2150-2014)-1
+#d0 = read.delim(files[1])
+#for(i in 2:length(files))
+#{
+#  #i=2
+#  cat(paste(files[i],":\t",i, "out of", length(files), "\n"))
+#  d0 = rbind(d0, read.delim(files[i]))
+#}
+
+
+yr0 = 12*(2105-2014)-1
 #yr0 = 12*(2100-2014)-1
 
 d = d0 %>% filter(Time>yr0)
@@ -120,7 +123,7 @@ up = function(x)
 
 pplot = function(zz, sMain, ylab="Relative change", 
                  s_ylim=c(1,1), abs_ylim=c(0,0), type="l", 
-                 pch=1, cex=1, lwd=1, zero=F, col=0, horzLine=0)
+                 pch=1, cex=1, lwd=1, zero=F, col=0, horzLine=0, cex.main=1, cex.axis=0.8, cex.lab=1)
 {
   
   if(col==0)
@@ -144,11 +147,11 @@ pplot = function(zz, sMain, ylab="Relative change",
     ylim=abs_ylim
   }
   
-  plot(zz$Time/12, (zz$up), type="l", col=bcol, ylim=ylim, xlab="Year", cex.axis=0.8, 
-       ylab=ylab, main=paste(sMain), cex.main=1)
+  plot(zz$Time/12, (zz$up), type="l", col=bcol, ylim=ylim, xlab="Year", cex.axis=cex.axis, 
+       ylab=ylab, main=paste(sMain), cex.main=cex.main, cex.lab=cex.lab)
   box(col=col)
-  axis(1, col=col, col.ticks=xcol, cex.axis=0.8)
-  axis(2, col=col, col.ticks=xcol, cex.axis=0.8)
+  axis(1, col=col, col.ticks=xcol, cex.axis=cex.axis)
+  axis(2, col=col, col.ticks=xcol, cex.axis=cex.axis)
   lines(zz$Time/12, zz$lo, col=col)
   polygon(c(zz$Time/12, rev(zz$Time/12)), c(zz$lo, rev(zz$up)), col=bcol, lty=0)
   abline(h=0, col=xcol)
@@ -222,7 +225,7 @@ if(output=="pdf")
   pdf(paste0(o_dir, "/base.pdf"))
 
 if(output=="svg")
-  svg(paste0(o_dir_svg, "/base1.svg"))
+  svg(paste0(o_dir_svg, "/base1_II.svg"))
 
 par(mfrow=c(2,2))
 
@@ -274,7 +277,7 @@ plot.frequency.spectrum2 <- function(X.k, xlimits=c(0,length(X.k))) {
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(expSharpeRatio), up=up(expSharpeRatio), lo=lo(expSharpeRatio))
 
-pplot(zz, "A. Sharpe Ratio", ylab = "", abs_ylim = c(-0.05, 0.05))
+pplot(zz, "(a) Sharpe Ratio", ylab = "", abs_ylim = c(-0.05, 0.05))
 lines(d4$Time/12, d4$expSharpeRatio, lwd=lwd)
 
 #lines(dd2$Time/12, dd2$expSharpeRatio, lwd=2, col=r_col)
@@ -287,7 +290,7 @@ lines(d4$Time/12, d4$expSharpeRatio, lwd=lwd)
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(nFirms), up=up(nFirms), lo=lo(nFirms))
 
-pplot(zz, "B. Number of firms", ylab = "", s_ylim = c(0.9, 1.1))
+pplot(zz, "(b) Number of firms", ylab = "", s_ylim = c(0.9, 1.1))
 lines(d4$Time/12, d4$nFirms, lwd=lwd)
 #lines(dd2$Time/12, dd2$nFirms, lwd=0.5, col=rgb(0.7,0.7,0.7))
 
@@ -297,7 +300,7 @@ lines(d4$Time/12, d4$nFirms, lwd=lwd)
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(Employment), up=up(Employment), lo=lo(Employment))
 
-pplot(zz, "C. Employment", ylab = "", s_ylim = c(0.97, 1.03))
+pplot(zz, "(c) Employment", ylab = "", s_ylim = c(0.97, 1.03))
 lines(d4$Time/12, d4$Employment, lwd=lwd)
 #lines(dd2$Time/12, dd2$Employment, lwd=0.5, col=rgb(0.7,0.7,0.7))
 
@@ -306,14 +309,14 @@ lines(d4$Time/12, d4$Employment, lwd=lwd)
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(u), up=up(u), lo=lo(u))
 
-pplot(zz, "D. Rate of unemployment", ylab = "", s_ylim = c(0.9, 1.1))
+pplot(zz, "(d) Rate of unemployment", ylab = "", s_ylim = c(0.9, 1.1))
 lines(d4$Time/12, d4$u, lwd=lwd)
 #lines(dd2$Time/12, dd2$Employment, lwd=0.5, col=rgb(0.7,0.7,0.7))
 
 if(output=="svg")
 {
   dev.off()
-  svg(paste0(o_dir_svg, "/base2.svg"))
+  svg(paste0(o_dir_svg, "/base2_II.svg"))
   par(mfrow=c(2,2))
 }  
 
@@ -325,7 +328,7 @@ if(output=="svg")
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(Sales), up=up(Sales), lo=lo(Sales))
 
-pplot(zz, "A. Sales", ylab = "", s_ylim = c(0.9, 1.1))
+pplot(zz, "(a) Sales", ylab = "", s_ylim = c(0.9, 1.1))
 lines(d4$Time/12, d4$Sales, lwd=lwd)
 #lines(dd2$Time/12, dd2$Sales, lwd=0.5, col=rgb(0.7,0.7,0.7))
 
@@ -334,7 +337,7 @@ lines(d4$Time/12, d4$Sales, lwd=lwd)
 zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(marketWage/marketPrice), up=up(marketWage/marketPrice), lo=lo(marketWage/marketPrice))
 
-pplot(zz, "B. Real wage", ylab = "", s_ylim = c(0.9, 1.1))
+pplot(zz, "(b) Real wage", ylab = "", s_ylim = c(0.9, 1.1))
 lines(d4$Time/12, d4$marketWage / d4$marketPrice, lwd=lwd)
 #lines(dd2$Time/12, dd2$marketWage / dd2$marketPrice, lwd=0.5, col=rgb(0.7,0.7,0.7))
 
@@ -358,7 +361,7 @@ zz = db %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(marketWage/marketPrice), up=up(marketWage/marketPrice), lo=lo(marketWage/marketPrice))
 zz[,2:4] = zz[,2:4] / corr
 
-pplot(zz, "D. Real wage (detrended 2% p.a.)", ylab = "", s_ylim = c(0.9, 1.1))
+pplot(zz, "(d) Real wage (detrended 2% p.a.)", ylab = "", s_ylim = c(0.9, 1.1))
 lines(d4$Time/12, d4$marketWage / d4$marketPrice / corr, lwd=lwd)
 
 dev.off()
@@ -473,18 +476,15 @@ dev.off()
 }
 
 #----------------------------------------------------
-#output="svg"
+# output="svg"
 if(output=="pdf")
 {
   pdf(paste0(o_dir, "/shocks.pdf"))
   par(mfrow=c(3,3))
 }
 
-
-nSvg = c("", "/shock1.svg", "/shock2.svg")
-shkYr = c(0, 10, 10)
-
-
+nSvg = c("", "/shock1_II.svg", "/shock2_II.svg", "/shock3_II.svg")
+shkYr = c(0, 10, 10, 10)
 
 for(shk in 2:n_ss)
 {
@@ -494,7 +494,7 @@ for(shk in 2:n_ss)
     par(mfrow=c(3,3))
   }
   
-  #shk=2
+  #shk=3
   
   dc = d %>% filter(Run==ss[shk]) 
   
@@ -513,7 +513,11 @@ for(shk in 2:n_ss)
   dd$dnFirmClosed = dd$nFirmClosed.x  / dd$nFirmClosed.y - 1  
   dd$dnFirmNew = dd$nFirmNew.x  / dd$nFirmNew.y   - 1
   dd$dVacancies = dd$Vacancies.x / dd$Vacancies.y - 1 
-  
+
+  #dd$dmarketWage = dd$marketWage0.x / dd$marketWage0.y - 1 
+  #dd$dmarketPrice = (dd$marketPrise0.x / dd$marketPrice.x) / (dd$marketPrise0.y / dd$marketPrice.y) - 1 
+  #dd$dEmployment = as.numeric(dd$employment0.x)  / as.numeric(dd$employment0.y) - 1 
+    
   dd = dd[dd$dnFirms!=0,] # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
 
@@ -555,21 +559,20 @@ for(shk in 2:n_ss)
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dnFirms), up=up(dnFirms), lo=lo(dnFirms))
 
-  pplot(zz, "A1. Number of firms", type="p", pch=20, cex=0.5)
+  pplot(zz, "(a) Number of firms", type="p", pch=20, cex=0.5)
   
   #-----------------
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dexpSharpeRatio, na.rm = T), up=up(dexpSharpeRatio), lo=lo(dexpSharpeRatio))
   
-  pplot(zz, "A2. Expected Sharpe Ratio", type="p", pch=20, cex=0.5, ylab = "Absolute change")
+  pplot(zz, "(b) Expected Sharpe Ratio", type="p", pch=20, cex=0.5, ylab = "Absolute change")
   
   #-----------------
   
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dEmployment, na.rm = T), up=up(dEmployment), lo=lo(dEmployment))
   
-  pplot(zz, "A3. Employment", type="p", pch=20, cex=0.5)
-  
+  pplot(zz, "(c) Employment", type="p", pch=20, cex=0.5)
   
   #-----------------
   zz = dd %>% group_by(Time) %>%
@@ -577,7 +580,7 @@ for(shk in 2:n_ss)
   
   
   
-  pplot(zz, "B1.Sales", type="p", pch=20, cex=0.5)
+  pplot(zz, "(d) Sales", type="p", pch=20, cex=0.5)
   
   #-----------------
   
@@ -588,7 +591,7 @@ for(shk in 2:n_ss)
     dplyr::summarize(mean=mean(dSales, na.rm = T), up=up(dSales), lo=lo(dSales))
   
     
-  pplot(zz, "B2. Supply and Sales (Red)", type="p", pch=20, cex=0.5, zero = T)
+  pplot(zz, "(e) Supply and Sales (Red)", type="p", pch=20, cex=0.5, zero = T)
   #lines(zz2$Time/12, zz2$mean, type="l", lwd=0.8, lty=3)
   lines(zz2$Time/12, zz2$mean, type="p", cex=0.25, col=rgb(1,0,0), lwd=0.5)
   
@@ -597,7 +600,7 @@ for(shk in 2:n_ss)
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dVacancies, na.rm = T), up=up(dVacancies), lo=lo(dVacancies))
   
-  pplot(zz, "B3. Vacancies", type="p", pch=20, cex=0.5)
+  pplot(zz, "(f) Vacancies", type="p", pch=20, cex=0.5)
   
 
 
@@ -605,19 +608,19 @@ for(shk in 2:n_ss)
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dRealWage, na.rm = T), up=up(dRealWage), lo=lo(dRealWage))
   
-  pplot(zz, "C1. Real wage", type="p", pch=20, cex=0.5, zero = T)
+  pplot(zz, "(g) Real wage", type="p", pch=20, cex=0.5, zero = T)
   
   #-----------------
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dmarketWage, na.rm = T), up=up(dmarketWage), lo=lo(dmarketWage))
   
-  pplot(zz, "C2. Wage", type="p", pch=20, cex=0.5, zero = T)
+  pplot(zz, "(h) Wage", type="p", pch=20, cex=0.5, zero = T)
   
   #-----------------
   zz = dd %>% group_by(Time) %>%
     dplyr::summarize(mean=mean(dmarketPrice, na.rm = T), up=up(dmarketPrice), lo=lo(dmarketPrice))
   
-  pplot(zz, "C3. Price", type="p", pch=20, cex=0.5, zero = T)
+  pplot(zz, "(i) Price", type="p", pch=20, cex=0.5, zero = T)
   
   
     #-----------------
@@ -639,7 +642,7 @@ if(output=="pdf")
 
 #--------------------------
 
-svg(paste0(o_dir_svg, "/NewClosed.svg"), width = 10, height = 7)
+svg(paste0(o_dir_svg, "/NewClosed_II.svg"), width = 10, height = 7)
 par(mfrow=c(1,2))
 
 shk = 2
@@ -662,7 +665,7 @@ zz2 = dd %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(dnFirmClosed), up=up(dnFirmClosed), lo=lo(dnFirmClosed))
 
 plot(zz$Time/12,  zz$mean, type="l", ylim=c(-0.15, 0.1), xlab="Years"
-     , ylab="Relative change", main="Productivity shock", col=rgb(0,0.5,0.9), lwd=3)
+     , ylab="Relative change", main="(a) Productivity shock", col=rgb(0,0.5,0.9), lwd=3)
 lines(zz2$Time/12, zz2$mean, col=rgb(0.9,0.25,0), type= "p", pch=20)  
 abline(h=0, v=0)
 legend("topright", legend=c("New firms", "Closed firms"),
@@ -672,7 +675,7 @@ legend("topright", legend=c("New firms", "Closed firms"),
 #----
 
 
-shk = 3
+shk = 4
 dc = d %>% filter(Run==ss[shk]) 
 
 dd = merge(dc, db, by=c("Scenario", "Time"))
@@ -692,7 +695,7 @@ zz2 = dd %>% group_by(Time) %>%
   dplyr::summarize(mean=mean(dnFirmClosed), up=up(dnFirmClosed), lo=lo(dnFirmClosed))
 
 plot(zz$Time/12,  zz$mean, type="l", ylim=c(-0.15, 0.1), xlab="Years"
-     , ylab="Relative change", main="Firm destruction", col=rgb(0,0.5,0.9), lwd=3)
+     , ylab="Relative change", main="(b) Firm-destruction-shock", col=rgb(0,0.5,0.9), lwd=3)
 lines(zz2$Time/12, zz2$mean, col=rgb(0.9,0.25,0), type= "p", pch=20)  
 abline(h=0, v=0)
 legend("topright", legend=c("New firms", "Closed firms"),
@@ -701,13 +704,100 @@ legend("topright", legend=c("New firms", "Closed firms"),
 dev.off()
 
 
+#--------------------------
+
+svg(paste0(o_dir_svg, "/Prod0_II.svg"), width = 10, height = 7)
+par(mfrow=c(2,3))
+
+cex.main=1.3
+cex.lab = 1.3
+cex.axis = 1.3
+
+shk = 3
+dc = d %>% filter(Run==ss[shk]) 
+
+dd = merge(dc, db, by=c("Scenario", "Time"))
+
+dd = dd %>% filter(Time<10*12)
+
+dd$dnFirms = dd$nFirms.x / dd$nFirms.y - 1 
+dd$dSales = dd$Sales.x  / dd$Sales.y - 1 
+dd$dProduction = as.numeric(dd$Production.x)  / as.numeric(dd$Production.y) - 1 
+dd$dEmployment = as.numeric(dd$Employment.x)  / as.numeric(dd$Employment.y) - 1 
+dd$dRealWage = (dd$marketWage.x  / dd$marketPrice.x ) / (dd$marketWage.y / dd$marketPrice.y) - 1 
+dd$dexpSharpeRatio = dd$expSharpeRatio.x  - dd$expSharpeRatio.y 
+dd$dmarketWage = dd$marketWage.x / dd$marketWage.y - 1 
+dd$dmarketPrice = dd$marketPrice.x / dd$marketPrice.y - 1 
+dd$dnFirmClosed = dd$nFirmClosed.x  / dd$nFirmClosed.y - 1  
+dd$dnFirmNew = dd$nFirmNew.x  / dd$nFirmNew.y   - 1
+dd$dVacancies = dd$Vacancies.x / dd$Vacancies.y - 1 
+
+dd$dmarketWage = dd$marketWage0.x / dd$marketWage0.y - 1 
+dd$dmarketPrice = (dd$marketPrice0.x / dd$marketPrice.x) / (dd$marketPrice0.y / dd$marketPrice.y) - 1 
+dd$dEmployment = as.numeric(dd$employment0.x)  / as.numeric(dd$employment0.y) - 1 
+dd$dnFirm0 = dd$nFirm0.x / dd$nFirm0.y - 1 
+dd$dSales0 = dd$sales0.x / dd$sales0.y - 1 
 
 
 
+dd = dd[dd$dnFirms!=0,] # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+zz = dd %>% group_by(Time) %>%
+  dplyr::summarize(mean=mean(dmarketPrice), up=up(dmarketPrice), lo=lo(dmarketPrice))
+
+pplot(zz, "(a) Relative sector price (p/P)", type="p", pch=20, cex=0.5, 
+      abs_ylim = c(-0.22, 0.17), cex.main=cex.main, cex.lab = cex.lab, cex.axis = cex.axis)
 
 
+zz = dd %>% group_by(Time) %>%
+  dplyr::summarize(mean=mean(dmarketWage), up=up(dmarketWage), lo=lo(dmarketWage))
+
+pplot(zz, "(b) Relative sector wage (w/W)", type="p", pch=20, cex=0.5, 
+    abs_ylim = c(-0.22, 0.17), cex.main=cex.main, cex.lab = cex.lab, cex.axis = cex.axis)
+
+zz = dd %>% group_by(Time) %>%
+  dplyr::summarize(mean=mean(dEmployment), up=up(dEmployment), lo=lo(dEmployment))
+
+pplot(zz, "(c) Sector employment", type="p", pch=20, cex=0.5, 
+    abs_ylim = c(-0.22, 0.17), cex.main=cex.main, cex.lab = cex.lab, cex.axis = cex.axis)
+
+zz = dd %>% group_by(Time) %>%
+  dplyr::summarize(mean=mean(dnFirm0), up=up(dnFirm0), lo=lo(dnFirm0))
+
+pplot(zz, "(d) Sector number of firms", type="p", pch=20, cex=0.5, 
+      abs_ylim = c(-0.22, 0.17), cex.main=cex.main, cex.lab = cex.lab, cex.axis = cex.axis)
+
+zz = dd %>% group_by(Time) %>%
+  dplyr::summarize(mean=mean(dSales0), up=up(dSales0), lo=lo(dSales0))
+
+pplot(zz, "(e) Sector sales", type="p", pch=20, cex=0.5, 
+      abs_ylim = c(-0.22, 0.17), cex.main=cex.main, cex.lab = cex.lab, cex.axis = cex.axis)
+
+
+dev.off()
 
 #------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 d4 = db %>% filter(Scenario==ids[1])
 

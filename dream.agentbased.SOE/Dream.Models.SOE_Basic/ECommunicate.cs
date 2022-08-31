@@ -51,6 +51,7 @@ namespace Dream.Models.SOE_Basic
         Nothing,
         Productivity,
         Tsunami,
+        ProductivitySector0,
         LaborSupply
     }
 
