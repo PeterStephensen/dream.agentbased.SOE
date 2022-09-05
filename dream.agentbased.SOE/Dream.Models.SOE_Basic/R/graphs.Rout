@@ -1,5 +1,5 @@
 
-R version 4.1.3 (2022-03-10) -- "One Push-Up"
+R version 4.2.0 (2022-04-22 ucrt) -- "Vigorous Calisthenics"
 Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-w64-mingw32/x64 (64-bit)
 
@@ -21,13 +21,13 @@ Type 'q()' to quit R.
 > #install.packages("forecast")
 > library(dplyr)
 
-Vedhæfter pakke: 'dplyr'
+VedhÃ¦fter pakke: 'dplyr'
 
-De følgende objekter er maskerede fra 'package:stats':
+De fÃ¸lgende objekter er maskerede fra 'package:stats':
 
     filter, lag
 
-De følgende objekter er maskerede fra 'package:base':
+De fÃ¸lgende objekter er maskerede fra 'package:base':
 
     intersect, setdiff, setequal, union
 
@@ -145,9 +145,9 @@ Registered S3 method overwritten by 'quantmod':
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.5)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  267 x værdier <= 0 udeladt fra logaritmisk plot
+  307 x vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  224 y værdier <= 0 udeladt fra logaritmisk plot
+  252 y vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(max(d_prod$OptimalProduction), max(d_prod$Sales))
@@ -156,9 +156,9 @@ Advarselsbeskeder:
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.5)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  1221 x værdier <= 0 udeladt fra logaritmisk plot
+  1293 x vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  1187 y værdier <= 0 udeladt fra logaritmisk plot
+  1243 y vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(d$nUnemployed/d$LaborSupply)
@@ -470,9 +470,9 @@ null device
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.7)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  267 x værdier <= 0 udeladt fra logaritmisk plot
+  307 x vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  224 y værdier <= 0 udeladt fra logaritmisk plot
+  252 y vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(max(d_prod$OptimalProduction), max(d_prod$Sales))
@@ -481,9 +481,9 @@ Advarselsbeskeder:
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.7)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  1221 x værdier <= 0 udeladt fra logaritmisk plot
+  1293 x vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  1187 y værdier <= 0 udeladt fra logaritmisk plot
+  1243 y vÃ¦rdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > 
@@ -505,5 +505,5 @@ null device
 > 
 > 
 > proc.time()
-  bruger   system forløbet 
-    2.40     0.37     5.60 
+  bruger   system forlÃ¸bet 
+    1.32     0.18     7.51 

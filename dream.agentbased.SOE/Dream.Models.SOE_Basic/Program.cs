@@ -14,10 +14,11 @@ namespace Dream.Models.SOE_Basic
         static bool Quit = false; 
         
         static void Main(string[] args)
-        {           
+        {
+
             //RunSimulation();
             //RunScenario();
-            RunMultiScenarios(4);
+            RunMultiScenarios(2);
         }
 
         static void RunMultiScenarios(int n)
@@ -30,32 +31,36 @@ namespace Dream.Models.SOE_Basic
             RunSimulationArgument arg;
             for (int i = 0; i < n; i++)
             {
-                int seed = random.Next();
+                for (int j = 0; j < 4; j++)
+                {
+                    int seed = random.Next();
 
-                arg = new RunSimulationArgument(EShock.Nothing, seed, true, false, i);
-                td = new Thread(new ParameterizedThreadStart(RunSimulation));
-                td.Start(arg);
-                Thread.Sleep(500);
+                    arg = new RunSimulationArgument(EShock.Nothing, seed, true, false, i);
+                    td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                    td.Start(arg);
+                    Thread.Sleep(500);
 
-                arg = new RunSimulationArgument(EShock.Productivity, seed, true, false, i);
-                td = new Thread(new ParameterizedThreadStart(RunSimulation));
-                td.Start(arg);
-                Thread.Sleep(500);
+                    arg = new RunSimulationArgument(EShock.Productivity, seed, true, false, i);
+                    td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                    td.Start(arg);
+                    Thread.Sleep(500);
 
-                arg = new RunSimulationArgument(EShock.ProductivitySector0, seed, true, false, i);
-                td = new Thread(new ParameterizedThreadStart(RunSimulation));
-                td.Start(arg);
-                Thread.Sleep(500);
+                    arg = new RunSimulationArgument(EShock.ProductivitySector0, seed, true, false, i);
+                    td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                    td.Start(arg);
+                    Thread.Sleep(500);
 
-                arg = new RunSimulationArgument(EShock.Tsunami, seed, true, false, i);
-                td = new Thread(new ParameterizedThreadStart(RunSimulation));
-                td.Start(arg);
-                Thread.Sleep(500);
+                    arg = new RunSimulationArgument(EShock.Tsunami, seed, true, false, i);
+                    td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                    td.Start(arg);
+                    Thread.Sleep(500);
 
+                }
+                Console.WriteLine("Round {0} out of {1}", i, n);
+                Thread.Sleep(19*60*1000);   // Wait 19 minutes
             }
 
             Console.WriteLine("Total time used: {0}", DateTime.Now - t0);
-
 
 
         }
@@ -129,8 +134,8 @@ namespace Dream.Models.SOE_Basic
 
         static void RunSimulation(EShock shk, int seed, bool saveScenario, bool quit=false, int i=0)
         {
-
-            Console.WriteLine("Starting {0}: {1}", i, shk);
+                      
+            Console.WriteLine("Starting {0}: {1}\t\t{2}", i, shk, DateTime.Now);
 
             //Multiple Goods 
             Settings settings = new();
@@ -309,7 +314,8 @@ namespace Dream.Models.SOE_Basic
             // Run the simulation
             new Simulation(settings, new Time(0, (1 + settings.EndYear - settings.StartYear) * settings.PeriodsPerYear - 1));
 
-            Console.WriteLine("Ending {0} - {1}",i, DateTime.Now - t0);
+            Console.WriteLine("Ending {0} - {1}\t\t{2}",i, DateTime.Now - t0, DateTime.Now);
+            Console.ReadKey();
 
             Quit = quit;
             

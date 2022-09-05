@@ -33,8 +33,8 @@ namespace Dream.Models.SOE_Basic
         double _profit, _p, _w; // Profits, price, wage 
         double _value = 0;
         List<Household> _employed;
-        int _jobApplications = 0;
-        int _jobQuitters = 0;
+        double _jobApplications = 0;
+        double _jobQuitters = 0;
         double _expPrice = 1.0;
         double _expWage = 1.0;
         double _expApplications = 0;
@@ -211,13 +211,14 @@ namespace Dream.Models.SOE_Basic
         #region Communicate
         public ECommunicate Communicate(ECommunicate comID, object o)
         {
+            Household h = null;
             switch (comID)
             {
                 case ECommunicate.JobApplication:
-                    _jobApplications++;
+                    h = (Household)o;
+                    _jobApplications += h.Productivity;
                     if (_vacancies>0)
                     {
-                        var h = (Household)o;
                         _employed.Add(h);
                         _vacancies -= h.Productivity;
                         _vacancies = _vacancies < 0 ? 0 : _vacancies;
@@ -226,8 +227,9 @@ namespace Dream.Models.SOE_Basic
                     return ECommunicate.No;
 
                 case ECommunicate.IQuit:
-                    _jobQuitters++;
-                    _employed.Remove((Household)o);
+                    h = (Household)o;
+                    _jobQuitters += h.Productivity;
+                    _employed.Remove(h);
                     return ECommunicate.Ok;
 
                 case ECommunicate.CanIBuy:
@@ -559,7 +561,7 @@ namespace Dream.Models.SOE_Basic
         {
             get { return _v_primo; }
         }
-        public int JobApplications
+        public double JobApplications
         {
             get { return _jobApplications; }
         }

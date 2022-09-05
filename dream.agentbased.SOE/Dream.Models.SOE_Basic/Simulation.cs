@@ -33,6 +33,7 @@ namespace Dream.Models.SOE_Basic
         Dictionary<int, Firm> _firmDict;
         Agents<Firm>[] _sectorList = null;
         Firm[] _randomFirmList = null;
+        DateTime _yearTime;
         #endregion
 
         #region Constructors
@@ -40,7 +41,9 @@ namespace Dream.Models.SOE_Basic
         {
             _settings = settings;
             _time = time;
-           
+            _yearTime = DateTime.Now;
+
+
             if (_settings.RandomSeed > 0)
             {
                 _random = new(_settings.RandomSeed);     // The one and only Random object
@@ -193,10 +196,19 @@ namespace Dream.Models.SOE_Basic
                     //Console.Write("\r                                                                           "); // Erase line
                     //Console.Write("\r{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
                     //Console.WriteLine("{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
-                    if(!_settings.SaveScenario)
+                    if (!_settings.SaveScenario)
+                    {
                         Console.WriteLine("{0:#.##}\t{1}\t{2}\t{3:#.######}\t{4:#.######}\t{5:#.######}\t{6}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear,
-                            n_firms, _households.Count, _statistics.PublicMarketWageTotal, _statistics.PublicMarketPriceTotal, 
-                            _statistics.PublicMarketWageTotal/ _statistics.PublicMarketPriceTotal, _settings.Shock); 
+                            n_firms, _households.Count, _statistics.PublicMarketWageTotal, _statistics.PublicMarketPriceTotal,
+                            _statistics.PublicMarketWageTotal / _statistics.PublicMarketPriceTotal, _settings.Shock);
+
+                        if (_time.Now % _settings.PeriodsPerYear == 0) // Once a year
+                        {
+                            Console.WriteLine("                                 Time use one year: {0}", DateTime.Now - _yearTime);
+                            _yearTime = DateTime.Now;
+
+                        }
+                    }
 
                     base.EventProc(idEvent);
                     break;
@@ -369,12 +381,12 @@ namespace Dream.Models.SOE_Basic
         }
         #endregion
 
+        #region Sector
         public Agents<Firm> Sector(int sector)
         {
             return _sectorList[sector];
         }
-
-
+        #endregion
 
         #region GetFirmFromID()
         public Firm GetFirmFromID(int ID)

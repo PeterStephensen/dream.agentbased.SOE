@@ -119,39 +119,41 @@ namespace Dream.Models.SOE_Basic
                     break;
 
                 case Event.System.PeriodStart:
-                    
-                    if (_time.Now == _settings.StatisticsWritePeriode)
+
+                    if (!_settings.SaveScenario)
                     {
+                        if (_time.Now == _settings.StatisticsWritePeriode)
+                        {
 
-                        string path = _settings.ROutputDir + "\\db_households.txt";
-                        if (File.Exists(path)) File.Delete(path);
-                        _fileDBHouseholds = File.CreateText(path);
-                        _fileDBHouseholds.WriteLine("ID\tAge\tFirmEmploymentID\tFirmShopID\tProductivity");
+                            string path = _settings.ROutputDir + "\\db_households.txt";
+                            if (File.Exists(path)) File.Delete(path);
+                            _fileDBHouseholds = File.CreateText(path);
+                            _fileDBHouseholds.WriteLine("ID\tAge\tFirmEmploymentID\tFirmShopID\tProductivity");
 
-                        path = _settings.ROutputDir + "\\db_firms.txt";
-                        if (File.Exists(path)) File.Delete(path);
-                        _fileDBFirms = File.CreateText(path);
-                        _fileDBFirms.WriteLine("ID\tAge\tphi0\texpPrice\texpWage\texpQuitters\texpApplications\texpPotentialSales\texpSales\tw\tp\tSales\tProfit");
+                            path = _settings.ROutputDir + "\\db_firms.txt";
+                            if (File.Exists(path)) File.Delete(path);
+                            _fileDBFirms = File.CreateText(path);
+                            _fileDBFirms.WriteLine("ID\tAge\tphi0\texpPrice\texpWage\texpQuitters\texpApplications\texpPotentialSales\texpSales\tw\tp\tSales\tProfit");
 
-                        path = _settings.ROutputDir + "\\db_statistics.txt";
-                        if (File.Exists(path)) File.Delete(path);
-                        _fileDBStatistics = File.CreateText(path);
-                        _fileDBStatistics.WriteLine("expSharpeRatio\tmacroProductivity\tmarketPrice\tmarketWage");
+                            path = _settings.ROutputDir + "\\db_statistics.txt";
+                            if (File.Exists(path)) File.Delete(path);
+                            _fileDBStatistics = File.CreateText(path);
+                            _fileDBStatistics.WriteLine("expSharpeRatio\tmacroProductivity\tmarketPrice\tmarketWage");
 
+                        }
+
+                        if (_time.Now == _settings.StatisticsWritePeriode + 1)
+                        {
+                            if (_fileDBHouseholds != null)
+                                _fileDBHouseholds.Close();
+
+                            if (_fileDBFirms != null)
+                                _fileDBFirms.Close();
+
+                            if (_fileDBStatistics != null)
+                                _fileDBStatistics.Close();
+                        }
                     }
-
-                    if (_time.Now == _settings.StatisticsWritePeriode + 1)
-                    {
-                        if (_fileDBHouseholds != null)
-                            _fileDBHouseholds.Close();
-
-                        if (_fileDBFirms != null)
-                            _fileDBFirms.Close();
-
-                        if (_fileDBStatistics != null)
-                            _fileDBStatistics.Close();
-                    }
-
                     // Profit income to households
                     _totalProfit = 0;
                     for (int i = 0; i < _settings.NumberOfSectors; i++)
@@ -162,7 +164,7 @@ namespace Dream.Models.SOE_Basic
                     break;
 
                 case Event.System.PeriodEnd:
-                    if (_time.Now == _settings.StatisticsWritePeriode)
+                    if (_time.Now == _settings.StatisticsWritePeriode & !_settings.SaveScenario)
                         Write();
 
                     // Statistics
