@@ -13,7 +13,7 @@ namespace Dream.Models.SOE_Basic
     public class Simulation : Agent
     {
         #region Static private fields
-        static Simulation _instance;
+        [ThreadStatic] static Simulation _instance;
         #endregion
 
         #region Private fields
@@ -40,7 +40,7 @@ namespace Dream.Models.SOE_Basic
         {
             _settings = settings;
             _time = time;
-
+           
             if (_settings.RandomSeed > 0)
             {
                 _random = new(_settings.RandomSeed);     // The one and only Random object
@@ -57,20 +57,24 @@ namespace Dream.Models.SOE_Basic
 
             if (_settings.SaveScenario & _settings.Shock!=EShock.Nothing)
             {
-                string scnPath = _settings.ROutputDir + "\\scenario_info.txt";
-                using (StreamReader sr = File.OpenText(scnPath))
-                {
-                    sr.ReadLine();                          // Read first line
-                    _seed = Int32.Parse(sr.ReadLine());  // Seed on second line
+                _seed = _settings.ScenarioSeed; 
+                _random = new(_seed);                    // Overwrite _random with seeded 
+                Agent.RandomSeed = _seed;
 
-                    _random = new(_seed);                    // Overwrite _random with seeded 
-                    Agent.RandomSeed = _seed;
+                //string scnPath = _settings.ROutputDir + "\\scenario_info.txt";
+                //using (StreamReader sr = File.OpenText(scnPath))
+                //{
+                //    sr.ReadLine();                          // Read first line
+                //    _seed = Int32.Parse(sr.ReadLine());  // Seed on second line
 
-                }
+                //    _random = new(_seed);                    // Overwrite _random with seeded 
+                //    Agent.RandomSeed = _seed;
+
+                //}
             }
 
-            if (_instance != null)
-                throw new Exception("Simulation object is singleton");
+            //if (_instance != null)
+            //    throw new Exception("Simulation object is singleton");
             
             _instance = this;
 
@@ -189,9 +193,10 @@ namespace Dream.Models.SOE_Basic
                     //Console.Write("\r                                                                           "); // Erase line
                     //Console.Write("\r{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
                     //Console.WriteLine("{0:#.##}\t{1}\t{2}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear, n_firms, _households.Count);
-                    Console.WriteLine("{0:#.##}\t{1}\t{2}\t{3:#.######}\t{4:#.######}\t{5:#.######}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear,
-                        n_firms, _households.Count, _statistics.PublicMarketWageTotal, _statistics.PublicMarketPriceTotal, 
-                        _statistics.PublicMarketWageTotal/ _statistics.PublicMarketPriceTotal); 
+                    if(!_settings.SaveScenario)
+                        Console.WriteLine("{0:#.##}\t{1}\t{2}\t{3:#.######}\t{4:#.######}\t{5:#.######}\t{6}", 1.0 * _settings.StartYear + 1.0 * _time.Now / _settings.PeriodsPerYear,
+                            n_firms, _households.Count, _statistics.PublicMarketWageTotal, _statistics.PublicMarketPriceTotal, 
+                            _statistics.PublicMarketWageTotal/ _statistics.PublicMarketPriceTotal, _settings.Shock); 
 
                     base.EventProc(idEvent);
                     break;

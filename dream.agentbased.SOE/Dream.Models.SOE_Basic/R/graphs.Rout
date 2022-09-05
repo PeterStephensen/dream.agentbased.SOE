@@ -145,9 +145,9 @@ Registered S3 method overwritten by 'quantmod':
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.5)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  127 x værdier <= 0 udeladt fra logaritmisk plot
+  267 x værdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  123 y værdier <= 0 udeladt fra logaritmisk plot
+  224 y værdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(max(d_prod$OptimalProduction), max(d_prod$Sales))
@@ -156,9 +156,9 @@ Advarselsbeskeder:
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.5)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  661 x værdier <= 0 udeladt fra logaritmisk plot
+  1221 x værdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  663 y værdier <= 0 udeladt fra logaritmisk plot
+  1187 y værdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(d$nUnemployed/d$LaborSupply)
@@ -470,9 +470,9 @@ null device
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.7)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  127 x værdier <= 0 udeladt fra logaritmisk plot
+  267 x værdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  123 y værdier <= 0 udeladt fra logaritmisk plot
+  224 y værdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > mx = max(max(d_prod$OptimalProduction), max(d_prod$Sales))
@@ -481,9 +481,9 @@ Advarselsbeskeder:
 +      log = "xy", col=cols[3], xlim=c(1,1.1*mx), ylim=c(1,1.1*mx), cex=0.7)
 Advarselsbeskeder:
 1: I xy.coords(x, y, xlabel, ylabel, log) :
-  661 x værdier <= 0 udeladt fra logaritmisk plot
+  1221 x værdier <= 0 udeladt fra logaritmisk plot
 2: I xy.coords(x, y, xlabel, ylabel, log) :
-  663 y værdier <= 0 udeladt fra logaritmisk plot
+  1187 y værdier <= 0 udeladt fra logaritmisk plot
 > abline(a=0,b=1, lty=2)
 > 
 > 
@@ -506,4 +506,4 @@ null device
 > 
 > proc.time()
   bruger   system forløbet 
-    2.32     0.28     4.31 
+    2.40     0.37     5.60 

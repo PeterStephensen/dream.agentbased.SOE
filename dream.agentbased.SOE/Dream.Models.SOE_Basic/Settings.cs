@@ -274,6 +274,12 @@ namespace Dream.Models.SOE_Basic
         /// </summary>
         public bool SaveScenario { get; set; } = false;
 
+        /// <summary>
+        /// Seed for random generator in scenario
+        /// </summary>
+        public int ScenarioSeed { get; set; } = -1;
+
+
         public int StartYear { get; set; } = 0;
         public int EndYear { get; set; } = 10;
         public int ShockPeriod { get; set; } = -1;

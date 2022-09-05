@@ -1,20 +1,145 @@
 ﻿using System;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dream.Models.SOE_Basic
 {
     class Program
     {
+
+        /// <summary>
+        /// Used flag quit when running multiple scenarios
+        /// </summary>
+        static bool Quit = false; 
+        
         static void Main(string[] args)
+        {           
+            //RunSimulation();
+            //RunScenario();
+            RunMultiScenarios(4);
+        }
+
+        static void RunMultiScenarios(int n)
         {
-            RunSimulation(args, false); // Mark saveScenario here!!
-            // Line of code
-        }   
-    
-        static void RunSimulation(string[] args, bool saveScenario=false)
+
+            DateTime t0 = DateTime.Now;
+            Random random = new Random();
+
+            Thread td;
+            RunSimulationArgument arg;
+            for (int i = 0; i < n; i++)
+            {
+                int seed = random.Next();
+
+                arg = new RunSimulationArgument(EShock.Nothing, seed, true, false, i);
+                td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                td.Start(arg);
+                Thread.Sleep(500);
+
+                arg = new RunSimulationArgument(EShock.Productivity, seed, true, false, i);
+                td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                td.Start(arg);
+                Thread.Sleep(500);
+
+                arg = new RunSimulationArgument(EShock.ProductivitySector0, seed, true, false, i);
+                td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                td.Start(arg);
+                Thread.Sleep(500);
+
+                arg = new RunSimulationArgument(EShock.Tsunami, seed, true, false, i);
+                td = new Thread(new ParameterizedThreadStart(RunSimulation));
+                td.Start(arg);
+                Thread.Sleep(500);
+
+            }
+
+            Console.WriteLine("Total time used: {0}", DateTime.Now - t0);
+
+
+
+        }
+
+        static void RunMultiScenarios_OLD(int n)
         {
+            DateTime t0 = DateTime.Now;
+            Random random = new Random();
+            
+            RunSimulationArgument arg;
+            for (int i = 0; i < n; i++)
+            {
+                int seed = random.Next();
+                arg = new RunSimulationArgument(EShock.Nothing, seed, true, false, i);
+                ThreadPool.QueueUserWorkItem(RunSimulation, arg);
+                Thread.Sleep(500);
+
+                arg = new RunSimulationArgument(EShock.Productivity, seed, true, false, i);
+                ThreadPool.QueueUserWorkItem(RunSimulation, arg);
+                Thread.Sleep(500);
+
+                arg = new RunSimulationArgument(EShock.ProductivitySector0, seed, true, false, i);
+                ThreadPool.QueueUserWorkItem(RunSimulation, arg);
+                Thread.Sleep(500);
+
+                // Last simulation
+                bool quit = i == n - 1 ? true : false;
+                arg = new RunSimulationArgument(EShock.Tsunami, seed, true, quit, i);
+                ThreadPool.QueueUserWorkItem(RunSimulation, arg);
+                Thread.Sleep(500);
+
+            }
+
+            Console.WriteLine("All threads started.");
+            while (!Quit)
+                Thread.Sleep(1000);
+
+            Console.WriteLine("Total time used: {0}", DateTime.Now - t0); 
+
+        }
+
+        public class RunSimulationArgument
+        {
+            public EShock shk;
+            public int seed;
+            public bool saveScenario;
+            public bool quit;
+            public int i;
+
+            public RunSimulationArgument(EShock shk, int seed, bool saveScenario, bool quit, int i)
+            {
+                this.shk = shk;
+                this.seed = seed;
+                this.saveScenario = saveScenario;
+                this.quit = quit;
+                this.i = i;
+            }
+        }
+
+        static void RunSimulation()
+        {
+            RunSimulation(EShock.Nothing, -1, false);
+        }
+
+
+        static void RunSimulation(object o)
+        {
+            var arg = (RunSimulationArgument)o;
+            RunSimulation(arg.shk, arg.seed, arg.saveScenario, arg.quit, arg.i);
+        }
+
+        static void RunSimulation(EShock shk, int seed, bool saveScenario, bool quit=false, int i=0)
+        {
+
+            Console.WriteLine("Starting {0}: {1}", i, shk);
+
             //Multiple Goods 
             Settings settings = new();
             settings.SaveScenario = saveScenario;
+            settings.Shock = shk;
+            settings.ScenarioSeed = seed;
+
+            settings.ShockPeriod = (2105 - 2014) * 12;
+
 
             // Scale
             double scale = 5 * 1.0; 
@@ -145,6 +270,7 @@ namespace Dream.Models.SOE_Basic
             // Time and randomseed           
             settings.StartYear = 2014;
             settings.EndYear = 2215;   //2160
+            //settings.EndYear = 2040;   //2160  ******************************************************
             settings.PeriodsPerYear = 12;
 
             settings.StatisticsOutputPeriode = (2075 - 2014) * 12;
@@ -154,13 +280,13 @@ namespace Dream.Models.SOE_Basic
             if(settings.SaveScenario)
                 settings.StatisticsGraphicsStartPeriod = 12 * 500;
 
-            if (args.Length == 1)
-            {
-                //settings.Shock = EShock.Tsunami;
-                //settings.IDScenario = Int32.Parse(args[0]);
-                settings.Shock = (EShock)Int32.Parse(args[0]);
-                settings.ShockPeriod = (2105 - 2014) * 12;
-            }
+            //if (args.Length == 1)
+            //{
+            //    //settings.Shock = EShock.Tsunami;
+            //    //settings.IDScenario = Int32.Parse(args[0]);
+            //    //settings.Shock = (EShock)Int32.Parse(args[0]);
+            //}
+
 
             //settings.RandomSeed = 123;  
             //settings.FirmNumberOfNewFirms = 1;
@@ -169,6 +295,7 @@ namespace Dream.Models.SOE_Basic
             settings.BurnInPeriod2 = (2035 - 2014) * 12;  //50
             settings.StatisticsWritePeriode = (2075 - 2014) * 12;
 
+            
             // !!!!! Remember some settings are changed in Simulation after BurnIn1 !!!!!
 
             //settings.BurnInPeriod1 = 1;
@@ -182,9 +309,10 @@ namespace Dream.Models.SOE_Basic
             // Run the simulation
             new Simulation(settings, new Time(0, (1 + settings.EndYear - settings.StartYear) * settings.PeriodsPerYear - 1));
 
-            Console.Write("\n");
-            Console.WriteLine(DateTime.Now - t0);
-            //Console.ReadLine();
+            Console.WriteLine("Ending {0} - {1}",i, DateTime.Now - t0);
+
+            Quit = quit;
+            
 
         }
 

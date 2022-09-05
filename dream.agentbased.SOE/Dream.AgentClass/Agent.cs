@@ -29,9 +29,9 @@ namespace Dream.AgentClass
         #endregion
 
         #region Static private fields
-        static int _nAgent; // Total number of agents
-        static Random _random;
-        static int _seed = -1;
+        [ThreadStatic] static int _nAgent; // Total number of agents
+        [ThreadStatic] static Random _random=null;
+        [ThreadStatic] static int _seed = -1;
         #endregion
 
         #region Private fields
@@ -173,7 +173,7 @@ namespace Dream.AgentClass
                     _random = new Random();
             }
 
-
+                
             Agent[] arr = new Agent[_count];
             int[] index = new int[_count];
             double[] rnd = new double[_count];
@@ -274,7 +274,10 @@ namespace Dream.AgentClass
         public static int RandomSeed
         {
             get { return _seed; }
-            set { _seed = value; }
+            set { 
+                _seed = value;
+                _random = new Random(_seed);
+            }
         }
 
 

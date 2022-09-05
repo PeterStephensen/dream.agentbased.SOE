@@ -88,7 +88,7 @@ namespace Dream.Models.SOE_Basic
             _interestRate = _settings.StatisticsInitialInterestRate;
 
             string sJson = JsonSerializer.Serialize(_settings);
-            File.WriteAllText(_settings.ROutputDir + "\\Settings.json", sJson);
+            //File.WriteAllText(_settings.ROutputDir + "\\Settings.json", sJson);
 
             if (_settings.LoadDatabase)
             {
@@ -424,9 +424,6 @@ namespace Dream.Models.SOE_Basic
                         _sales[i], _expSharpeRatio[i], _simulation.Sector(i).Count);
                     }                    
                     _fileSectors.Flush();
-                
-
-
 
 
                     if (_time.Now==_settings.StatisticsOutputPeriode)
@@ -569,41 +566,42 @@ namespace Dream.Models.SOE_Basic
                 Directory.CreateDirectory(_settings.ROutputDir + "\\Scenarios\\Macro");
                 Directory.CreateDirectory(_settings.ROutputDir + "\\Scenarios\\Sectors");
 
-                string scnPath = _settings.ROutputDir + "\\scenario_info.txt";
+                //string scnPath = _settings.ROutputDir + "\\scenario_info.txt";
+                _scenario_id = Simulation.RandomSeed;
                 if (_settings.Shock == EShock.Nothing) // Base run
                 {
-                    if (!File.Exists(scnPath))
-                        _scenario_id = 1;
-                    else
-                    {
-                        using (StreamReader sr = File.OpenText(scnPath))
-                            _scenario_id = Int32.Parse(sr.ReadLine());
-                        _scenario_id++;
-                        Console.WriteLine("Base: {0}, {1}", _scenario_id, _simulation.Seed); // Save seed so it can be used in shocks
+                    //if (!File.Exists(scnPath))
+                    //    _scenario_id = 1;
+                    //else
+                    //{
+                    //    using (StreamReader sr = File.OpenText(scnPath))
+                    //        _scenario_id = Int32.Parse(sr.ReadLine());
+                    //    _scenario_id++;
+                    //    Console.WriteLine("Base: {0}, {1}", _scenario_id, _simulation.Seed); // Save seed so it can be used in shocks
 
-                    }
+                    //}
 
-                    if (File.Exists(scnPath)) File.Delete(scnPath);
-                    using (StreamWriter sw = File.CreateText(scnPath))
-                    {
-                        sw.WriteLine("{0}", _scenario_id);
-                        sw.WriteLine("{0}", _simulation.Seed);
-                    }
+                    //if (File.Exists(scnPath)) File.Delete(scnPath);
+                    //using (StreamWriter sw = File.CreateText(scnPath))
+                    //{
+                    //    sw.WriteLine("{0}", _scenario_id);
+                    //    sw.WriteLine("{0}", _simulation.Seed);
+                    //}
 
-                    macroPath = _settings.ROutputDir + "\\Scenarios\\Macro\\base_" + _scenario_id.ToString() + ".txt";
-                    sectorsPath = _settings.ROutputDir + "\\Scenarios\\Sectors\\base_" + _scenario_id.ToString() + ".txt";
+                    macroPath = _settings.ROutputDir + "\\Scenarios\\Macro\\" + _scenario_id.ToString() + "_base.txt";
+                    sectorsPath = _settings.ROutputDir + "\\Scenarios\\Sectors\\b" + _scenario_id.ToString() + "_base.txt";
 
                 }
                 else //Counterfactual
                 {
-                    
-                    using (StreamReader sr = File.OpenText(scnPath))
-                        _scenario_id = Int32.Parse(sr.ReadLine());
 
-                    _runName = _settings.Shock.ToString();                                    
-                    macroPath = _settings.ROutputDir + "\\Scenarios\\Macro\\count_"  + _runName + "_" + _scenario_id.ToString() + ".txt";
-                    sectorsPath = _settings.ROutputDir + "\\Scenarios\\Sectors\\count_" + _runName + "_" + _scenario_id.ToString() + ".txt";
-                    Console.WriteLine("{0}: {1}, {2}", _runName, _scenario_id, _simulation.Seed);
+                    //using (StreamReader sr = File.OpenText(scnPath))
+                    //    _scenario_id = Int32.Parse(sr.ReadLine());
+
+                    _runName = _settings.Shock.ToString();
+                    macroPath = _settings.ROutputDir + "\\Scenarios\\Macro\\" + _scenario_id.ToString() + "_" + _runName + "_count.txt";
+                    sectorsPath = _settings.ROutputDir + "\\Scenarios\\Sectors\\" + _scenario_id.ToString() + "_" + _runName + "_count.txt";
+                    //Console.WriteLine("{0}: {1}, {2}", _runName, _scenario_id, _simulation.Seed);
 
                 }
             }
@@ -632,9 +630,9 @@ namespace Dream.Models.SOE_Basic
             {
                 _fileFirmReport.Close();
                 _fileHouseholdReport.Close();
-                _fileMacro.Close();
-                _fileSectors.Close();
             }
+            _fileMacro.Close();
+            _fileSectors.Close();
         }
         #endregion
         #endregion
